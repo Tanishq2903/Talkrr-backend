@@ -1,43 +1,45 @@
 const UserModel = require("../models/UserModel")
-const bcryptjs = require('bcryptjs');
+const bcryptjs = require('bcryptjs')
 
-async function registerUser(req,res){
+async function registerUser(request,response){
     try {
-        const{name,email,password,profile_pic} = req.body
-     //check if email exist already
-        const checkIfAlreadyExist = await UserModel.findOne({email})
-        if(checkIfAlreadyExist){
-            return res.status(400).json({
-                message : "email already exists" ,
-                error : true
-            }) 
-//if not exist than first convert password into hash
-            const salt = bcryptjs.genSalt(10)
-            const hashPassword = await bcryptjs.hash(password,salt)
-//collect all details in single variable
-         const userDetails = {
+        const { name, email , password, profile_pic } = request.body
+
+        const checkEmail = await UserModel.findOne({ email }) //{ name,email}  // null
+
+        if(checkEmail){
+            return response.status(400).json({
+                message : "Already user exits",
+                error : true,
+            })
+        }
+
+        //password into hashpassword
+        const salt = await bcryptjs.genSalt(10)
+        const hashpassword = await bcryptjs.hash(password,salt)
+
+        const payload = {
             name,
             email,
-            password : hashPassword,
-            profile_pic
-         }
-     //create new usermodel
-         const user = new UserModel(userDetails)
-         //save that model in database
-         const userSave = await user.save()
-
-        
+            profile_pic,
+            password : hashpassword
         }
-        return res.status(200).json({
-            message : "user registered successfully"
-         })
+
+        const user = new UserModel(payload)
+        const userSave = await user.save()
+
+        return response.status(201).json({
+            message : "User created successfully",
+            data : userSave,
+            success : true
+        })
+
     } catch (error) {
-        return res.status(500).json({
+        return response.status(500).json({
             message : error.message || error,
             error : true
         })
     }
 }
- 
 
 module.exports = registerUser
