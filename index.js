@@ -1,14 +1,14 @@
 const express = require('express')
 const cors = require('cors')
-require('dotenv').config()
+require('dotenv').config( {path: "./.env"})
 const connectDB = require('./config/connectDB')
 const router = require('./routes/index')
 const cookiesParser = require('cookie-parser')
 const { app, server } = require('./sockets/index')
 
-// const app = express()
 app.use(cors({
     origin : process.env.FRONTEND_URL,
+    method: ["GET", "POST", "DELETE", "PUT"],
     credentials : true
 }))
 app.use(express.json())
