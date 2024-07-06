@@ -1,32 +1,36 @@
 const express = require('express')
 const cors = require('cors')
-require('dotenv').config( {path: "./.env"})
+require('dotenv').config({ path: "./.env" })
 const connectDB = require('./config/connectDB')
 const router = require('./routes/index')
-const cookiesParser = require('cookie-parser')
+const cookieParser = require('cookie-parser')
 const { app, server } = require('./sockets/index')
 
+// Middleware
 app.use(cors({
-    origin : process.env.FRONTEND_URL,
-    method: ["GET", "POST", "DELETE", "PUT"],
-    credentials : true
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    credentials: true
 }))
+
 app.use(express.json())
-app.use(cookiesParser())
+app.use(cookieParser())
 
 const PORT = process.env.PORT || 8080
 
-app.get('/',(request,response)=>{
+app.get('/', (request, response) => {
     response.json({
-        message : "Server running at " + PORT
+        message: "Server running at " + PORT
     })
 })
 
-//api endpoints
-app.use('/api',router)
+// API endpoints
+app.use('/api', router)
 
-connectDB().then(()=>{
-    server.listen(PORT,()=>{
-        console.log("server running at " + PORT)
+connectDB().then(() => {
+    server.listen(PORT, () => {
+        console.log("Server running at " + PORT)
     })
+}).catch(error => {
+    console.error("Database connection failed:", error)
 })
