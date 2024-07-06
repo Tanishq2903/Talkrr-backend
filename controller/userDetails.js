@@ -1,4 +1,4 @@
-const getUserDetailsFromToken = require("../helper/getUserDetailsFromToken")
+const getUserDetailsFromToken = require("../helper/getUserDetailsFromToken.js")
 
 async function userDetails(request,response){
     try {
