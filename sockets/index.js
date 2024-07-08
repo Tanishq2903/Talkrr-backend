@@ -1,23 +1,22 @@
 const express = require('express')
 const { Server } = require('socket.io')
-const http  = require('http')
+const http = require('http')
 const getUserDetailsFromToken = require('../helper/getUserDetailsFromToken.js')
 const UserModel = require('../models/UserModel.js')
-const { ConversationModel,MessageModel } = require('../models/ConversationModel.js')
+const { ConversationModel, MessageModel } = require('../models/ConversationModel.js')
 const getConversation = require('../helper/getConversation.js')
 
 const app = express()
 
 /***socket connection */
 const server = http.createServer(app)
-const io = new Server(server,{
-    cors : {
-        origin : 'https://talkrr-chatwithyourlovedones.netlify.app',
+const io = new Server(server, {
+    cors: {
+        origin: 'https://talkrr-chatwithyourlovedones.netlify.app',
         methods: ["GET", "POST"],
-        credentials : true
+        credentials: true
     }
 })
-
 
 const onlineUser = new Set()
 
@@ -51,24 +50,24 @@ io.on('connection', async (socket) => {
     }
 
     // Handle message-page event
-    socket.on('message-page', async (userId) => {
-        console.log('userId', userId);
+    socket.on('message-page', async (otherUserId) => {
+        console.log('userId', otherUserId);
         try {
-            const userDetails = await UserModel.findById(userId).select("-password");
+            const userDetails = await UserModel.findById(otherUserId).select("-password");
             const payload = {
                 _id: userDetails?._id,
                 name: userDetails?.name,
                 email: userDetails?.email,
                 profile_pic: userDetails?.profile_pic,
-                online: onlineUser.has(userId)
+                online: onlineUser.has(otherUserId)
             };
             socket.emit('message-user', payload);
 
             // Get previous messages
             const getConversationMessage = await ConversationModel.findOne({
                 "$or": [
-                    { sender: userId, receiver: userId },
-                    { sender: userId, receiver: userId }
+                    { sender: user._id, receiver: otherUserId },
+                    { sender: otherUserId, receiver: user._id }
                 ]
             }).populate('messages').sort({ updatedAt: -1 });
 
@@ -180,9 +179,7 @@ io.on('connection', async (socket) => {
     });
 });
 
-
 module.exports = {
     app,
     server
 }
-
