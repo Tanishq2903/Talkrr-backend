@@ -4,6 +4,9 @@ const { MessageModel, ConversationModel } = require('../models/ConversationModel
 const sendMessage = async (req, res) => {
     try {
         const { sender, receiver, text, imageUrl, videoUrl } = req.body;
+        // Example check
+console.log(req.body); // Ensure it has all required fields
+
 
         let conversation = await ConversationModel.findOne({
             "$or": [
@@ -18,6 +21,7 @@ const sendMessage = async (req, res) => {
         }
 
         const message = new MessageModel({ text, imageUrl, videoUrl, msgByUserId: sender });
+        
         const savedMessage = await message.save();
 
         conversation.messages.push(savedMessage._id);

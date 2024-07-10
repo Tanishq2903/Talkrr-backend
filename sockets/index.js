@@ -176,7 +176,33 @@ io.on('connection', async (socket) => {
             console.error('Error handling seen event:', error);
         }
     });
+    socket.on('offer', (data) => {
+        console.log('Received offer:', data);
+        io.to(data.receiver).emit('offer', {
+            offer: data.offer,
+            sender: data.sender
+        });
+    });
 
+    // Handle video call answer
+    socket.on('answer', (data) => {
+        console.log('Received answer:', data);
+        io.to(data.receiver).emit('answer', {
+            answer: data.answer,
+            sender: data.sender
+        });
+    });
+
+    // Handle ICE candidate
+    socket.on('ice-candidate', (data) => {
+        console.log('Received ICE candidate:', data);
+        io.to(data.receiver).emit('ice-candidate', {
+            candidate: data.candidate,
+            sender: data.sender
+        });
+    });
+
+    
     // Handle disconnection
     socket.on('disconnect', () => {
         if (user) {
